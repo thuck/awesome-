@@ -58,7 +58,7 @@ layouts =
 
  -- {{{ Tags
  tags = {
-   names  = { "1:www", "2:editor", "3:mail", "4:im", 5, 6, 7, 8, 9}
+   names  = { "1:www", "2:work", "3:mail", "4:im", "5:VM", 6, 7, 8, 9}
  }
  
  for s = 1, screen.count() do
@@ -334,8 +334,17 @@ awful.rules.rules = {
     { rule = { class = "gimp" },
       properties = { floating = true } },
     -- Set Firefox to always map on tags number 2 of screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { tag = tags[1][2] } },
+     { rule = { class = "Nightly" },
+       properties = { tag = tags[1][1] } },
+     { rule = { class = "Pidgin" },
+       properties = { tag = tags[1][4] } },
+     { rule = { class = "VirtualBox" },
+       properties = { tag = tags[1][5] } },
+
+     { rule = { class = "Mail" },
+       properties = { tag = tags[2][3] } },
+
+
 }
 -- }}}
 
