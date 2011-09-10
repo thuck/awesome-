@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pgrep -u $USER $@ &> /dev/null || ($@ &> /dev/null &)
+pgrep -u $USER $1 &> /dev/null || ($@ &> /dev/null &)

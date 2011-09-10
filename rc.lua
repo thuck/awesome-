@@ -340,9 +340,10 @@ awful.rules.rules = {
        properties = { tag = tags[1][4] } },
      { rule = { class = "VirtualBox" },
        properties = { tag = tags[1][5] } },
-
      { rule = { class = "Mail" },
        properties = { tag = tags[2][3] } },
+     { rule = { class = "kate" },
+       properties = { tag = tags[2][2] } },
 
 
 }
@@ -378,5 +379,25 @@ end)
 client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+-- Autorun programs
+autorun = true
+autorunApps = 
+{ 
+   "xscreensaver -no-splash",
+   "kate",
+   --"firefox",
+}
+if autorun then
+   for app = 1, #autorunApps do
+       awful.util.spawn_with_shell("/home/thuck/.config/awesome/run_once.sh " .. autorunApps[app]) 
+   end
+end
+
+
+
+
+
+
 
 
