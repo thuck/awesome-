@@ -11,11 +11,30 @@ require("naughty")
 require("debian.menu")
 
 require("vicious")
+require("obvious.basic_mpd")
+require("obvious.battery")
+require("obvious.clock")
+require("obvious.cpu")
+require("obvious.fs_usage")
+require("obvious.io")
+require("obvious.lib")
+require("obvious.loadavg")
+require("obvious.mem")
+require("obvious.net")
+require("obvious.popup_run_prompt")
+require("obvious.umts")
+require("obvious.volume_alsa")
+require("obvious.volume_freebsd")
+require("obvious.wlan")
+require("obvious.temp_info")
+require("obvious.keymap_switch")
+
+
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 --beautiful.init("/usr/share/awesome/themes/default/theme.lua")
-beautiful.init("/home/thuck/.config/awesome/theme.current/theme.lua")
+beautiful.init("/home/thuck/.config/awesome/current/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "konsole"
@@ -89,11 +108,34 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
 -- Create a textclock widget
 mytextclock = awful.widget.textclock({ align = "right" })
 
+-- Initialize widget
+mpdwidget = widget({ type = "textbox" })
+-- Register widget
+vicious.register(mpdwidget, vicious.widgets.mpd,
+    function (widget, args)
+        if args["{state}"] == "Stop" then 
+            return " - "
+        else 
+            return args["{Artist}"]..' - '.. args["{Title}"]
+        end
+    end, 10)
+
 -- Create a systray
 mysystray = widget({ type = "systray" })
 
+myspace = widget({ type = "textbox" })
+myspace.text = '<span color="green"> :: </span>'
+myscreens = widget({ type = "textbox" })
+myscreens.text = "NS: " .. screen.count()
+myscreens:buttons(awful.util.table.join(
+   awful.button({ }, 1, function () awful.util.spawn("xrandr --output VGA1 --auto --left-of LVDS1 --output LVDS1 --auto") end)
+ ))
+
+obvious.keymap_switch.set_layouts({ "us(intl)", "br" })
+
 -- Create a wibox for each screen and add it
 mywibox = {}
+personalwibox = {}
 mypromptbox = {}
 mylayoutbox = {}
 mytaglist = {}
@@ -158,6 +200,7 @@ for s = 1, screen.count() do
 
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
+
     -- Add widgets to the wibox - order matters
     mywibox[s].widgets = {
         {
@@ -169,9 +212,32 @@ for s = 1, screen.count() do
         mylayoutbox[s],
         mytextclock,
         s == 1 and mysystray or nil,
+	obvious.volume_alsa(),
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
     }
+
+    -- Create the Personal box
+    personalwibox[s] = awful.wibox({ position = "bottom", screen = s })
+    
+    -- Add widgets to the Personal
+    personalwibox[s].widgets = {
+	obvious.battery(),
+	myspace,
+	myscreens,
+	myspace,
+    --    mytextclock,
+--	mpdwidget,
+	obvious.basic_mpd(),
+	myspace,
+	obvious.keymap_switch(),
+	myspace,
+	obvious.wlan(),
+        layout = awful.widget.layout.horizontal.leftright
+
+    }
+
+
 end
 -- }}}
 
@@ -318,6 +384,8 @@ clientbuttons = awful.util.table.join(
 root.keys(globalkeys)
 -- }}}
 
+--number of screens
+ns = screen.count()
 -- {{{ Rules
 awful.rules.rules = {
     -- All clients will match this rule.
@@ -335,15 +403,17 @@ awful.rules.rules = {
       properties = { floating = true } },
     -- Set Firefox to always map on tags number 2 of screen 1.
      { rule = { class = "Nightly" },
-       properties = { tag = tags[1][1] } },
+       properties = { tag = tags[ns][1] } },
      { rule = { class = "Pidgin" },
        properties = { tag = tags[1][4] } },
      { rule = { class = "VirtualBox" },
        properties = { tag = tags[1][5] } },
      { rule = { class = "Mail" },
-       properties = { tag = tags[2][3] } },
-     { rule = { class = "kate" },
-       properties = { tag = tags[2][2] } },
+       properties = { tag = tags[ns][3] } },
+     { rule = { class = "Kate" },
+       properties = { tag = tags[1][2] } },
+     { rule = { class = "Konsole" },
+       properties = { tag = tags[1][2] } },
 
 
 }
@@ -386,6 +456,7 @@ autorunApps =
 { 
    "xscreensaver -no-splash",
    "kate",
+   "konsole",
    --"firefox",
 }
 if autorun then
